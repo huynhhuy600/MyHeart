@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MyHeart ✨</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/three@0.157.0/build/three.min.js"></script>
+</head>
+<body>
+<canvas id="c"></canvas>  <!-- canvas as background -->
+<div id="ui">
+  <button class="btn" onclick="location.href='input.html'">Tạo link 💌</button>
+  <button class="btn secondary" id="recolor">Đổi màu</button>
+  <span class="notice"><small class="tip">Tip: Nhấn ▶️ để bật nhạc (trình duyệt yêu cầu thao tác).</small></span>
+</div>
+
+<div id="msgRing"><div class="ring" id="ring"></div></div>
+<button class="btn audioBtn" id="audioToggle">▶️ Nhạc</button>
+
+<script src="heart.js"></script>
+<script> MyHeart.start(); </script>
+</body>
+</html>
