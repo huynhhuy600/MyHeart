@@ -1,24 +1,2105 @@
-<!doctype html>
-<html lang="vi">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MyHeart ✨</title>
-<link rel="stylesheet" href="style.css">
-<script src="https://unpkg.com/three@0.157.0/build/three.min.js"></script>
-</head>
-<body>
-<canvas id="c"></canvas>  <!-- canvas as background -->
-<div id="ui">
-  <button class="btn" onclick="location.href='input.html'">Tạo link 💌</button>
-  <button class="btn secondary" id="recolor">Đổi màu</button>
-  <span class="notice"><small class="tip">Tip: Nhấn ▶️ để bật nhạc (trình duyệt yêu cầu thao tác).</small></span>
-</div>
+<!DOCTYPE html>
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>title</title>
+  </head>
+  <header class="bg-sky-100 text-sky-900 sticky top-0">
+    <div class="max-w-6xl mx-auto flex items-center justify-between p-4">
+      <div class="text-2xl font-bold">Tra Cứu Thông Tin</div>
 
-<div id="msgRing"><div class="ring" id="ring"></div></div>
-<button class="btn audioBtn" id="audioToggle">▶️ Nhạc</button>
+      <!-- <nav class="hidden md:flex space-x-6">
+        <a href="#" class="hover:text-gray-300">Home</a>
+        <a href="#" class="hover:text-gray-300">About</a>
+        <a href="#" class="hover:text-gray-300">Services</a>
+        <a href="#" class="hover:text-gray-300">Contact</a> -->
+      <!-- </nav> -->
 
-<script src="heart.js"></script>
-<script> MyHeart.start(); </script>
-</body>
+      <button class="md:hidden text-3xl">☰</button>
+    </div>
+  </header>
+  <body class="bg-gray-100">
+    <div
+      x-data="{
+    /* ===== TRẠNG THÁI ===== */
+    searchMode: 'cu_sang_moi',
+    khuVuc: '',
+    xa: '',
+    toNhap: '',
+    ketQua: '',
+    mapping: {},
+    initWatch() {
+      this.$watch('searchMode', (value) => {
+        // reset khi đổi radio
+        this.xa = '';
+        this.toNhap = '';
+        this.ketQua = '';
+      });
+    },
+
+    /* ===== DANH SÁCH XÃ / PHƯỜNG ===== */
+    danhSachXa: {
+        'Quy Nhơn': ['Thị Nại','Đống Đa','Hải Cảng','Trần Phú','Nhơn Hội','Nhơn Lý',
+    'Nhơn Bình','Nhơn Hải','Bùi Thị Xuân','Phước Mỹ','Nguyễn Văn Cừ',
+    'Quang Trung','Ngô Mây','Ghềnh Ráng','Nhơn Phú','Trần Quang Diệu','Nhơn Châu'],
+      'An Nhơn': ['Phường Bình Định','Phường An Nhơn','Phường An Nhơn Đông','Phường An Nhơn Nam','Phường An Nhơn Bắc','Xã An Nhơn Tây'],
+      'Tuy Phước': ['Xã Tuy Phước','Xã Tuy Phước Đông','Xã Tuy Phước Tây','Xã Tuy Phước Bắc'],
+      'Hoài Ân': [ 'Thị trấn Tăng Bạt Hổ', 'Xã Ân Đức','Xã Ân Phong','Xã Ân Tường Đông',  'Xã Ân Hữu',  'Xã Đăk Mang',  'Xã Ân Tường Tây',  'Xã Ân Nghĩa',
+  'Xã Bok Tới',  'Xã Ân Tín',  'Xã Ân Sơn',  'Xã Ân Thạnh',  'Xã Ân Mỹ',  'Xã Ân Hảo Đông',  'Xã Ân Hảo Tây'],
+      'Vân Canh': ['Xã Vân Canh','Xã Canh Vinh','Xã Canh Liên'],
+      'Vĩnh Thạnh': ['Xã Vĩnh Thạnh','Xã Vĩnh Thịnh','Xã Vĩnh Quang','Xã Vĩnh Sơn'],
+      'Phù Mỹ': ['Xã Phù Mỹ','Xã An Lương','Xã Bình Dương','Xã Phù Mỹ Đông','Xã Phù Mỹ Tây','Xã Phù Mỹ Nam','Xã Phù Mỹ Bắc'],
+      'Tây Sơn': ['Xã Tây Sơn','Xã Bình Khê','Xã Bình Phú','Xã Bình Hiệp','Xã Bình An'],
+      'Phù Cát': ['Xã Phù Cát','Xã Xuân An','Xã Ngô Mây','Xã Cát Tiến','Xã Đề Gi','Xã Hòa Hội','Xã Hội Sơn'],
+      'An Lão': ['Xã An Lão','Xã An Vinh','Xã An Hòa','Xã An Toàn'],
+      'Hoài Nhơn': ['Phường Bồng Sơn','Phường Hoài Nhơn','Phường Tam Quan','Phường Hoài Nhơn Đông','Phường Hoài Nhơn Tây','Phường Hoài Nhơn Nam','Phường Hoài Nhơn Bắc']
+    },
+      mapping: {
+  'Quy Nhơn': {
+ // ===== PHƯỜNG QUY NHƠN =====
+    'Thị Nại': {
+      newWard: 'Phường Quy Nhơn',
+      newCode: '21583',
+      ranges: [
+        { from: 1, to: 53, offset: 0, scale: '1/500' }
+      ]
+    },
+
+    'Đống Đa': {
+      newWard: 'Phường Quy Nhơn',
+      newCode: '21583',
+      ranges: [
+        { from: 1, to: 66, offset: 53, scale: '1/500' },
+        { from: 75, to: 81, offset: 45, scale: '1/500' }
+      ]
+    },
+
+    'Hải Cảng': {
+      newWard: 'Phường Quy Nhơn',
+      newCode: '21583',
+      ranges: [
+        { from: 1, to: 52, offset: 126, scale: '1/500' }
+      ]
+    },
+
+    'Trần Phú': {
+      newWard: 'Phường Quy Nhơn',
+      newCode: '21583',
+      ranges: [
+        { from: 2, to: 77, offset: 177, scale: '1/500' },
+        { from: 1, to: 1, offset: 253, scale: '1/10.000' }
+      ]
+    },
+
+    // ===== PHƯỜNG QUY NHƠN ĐÔNG =====
+    'Nhơn Hội': {
+      newWard: 'Phường Quy Nhơn Đông',
+      newCode: '21601',
+      ranges: [
+        { from: 1, to: 12, offset: 0, scale: '1/10.000' },
+        { from: 13, to: 69, offset: 0, scale: '1/1.000' }
+      ]
+    },
+
+    'Nhơn Lý': {
+      newWard: 'Phường Quy Nhơn Đông',
+      newCode: '21601',
+      ranges: [
+        { from: 4, to: 11, offset: 67, scale: '1/1.000' },
+        { from: 12, to: 26, offset: 68, scale: '1/500' },
+        { from: 28, to: 28, offset: 67, scale: '1/2000' }
+      ]
+    },
+
+    'Nhơn Bình': {
+      newWard: 'Phường Quy Nhơn Đông',
+      newCode: '21601',
+      ranges: [
+        { from: 1, to: 81, offset: 95, scale: '1/1.000' }
+      ]
+    },
+
+    // ===== PHƯỜNG QUY NHƠN TÂY =====
+    'Bùi Thị Xuân': {
+      newWard: 'Phường Quy Nhơn Tây',
+      newCode: '21589',
+      ranges: [
+        { from: 1, to: 8, offset: 0, scale: '1/10.000' },
+        { from: 9, to: 83, offset: 0, scale: '1/1.000' }
+      ]
+    },
+
+    'Phước Mỹ': {
+      newWard: 'Phường Quy Nhơn Tây',
+      newCode: '21589',
+      ranges: [
+        { from: 1, to: 22, offset: 83, scale: '1/2000' },
+        { from: 23, to: 40, offset: 92, scale: '1/5000' }
+      ]
+    },
+
+    // ===== PHƯỜNG QUY NHƠN NAM =====
+    'Nguyễn Văn Cừ': {
+      newWard: 'Phường Quy Nhơn Nam',
+      newCode: '21592',
+      ranges: [
+        { from: 1, to: 33, offset: 0, scale: '1/500' }
+      ]
+    },
+
+    'Quang Trung': {
+      newWard: 'Phường Quy Nhơn Nam',
+      newCode: '21592',
+      ranges: [
+        { from: 1, to: 50, offset: 33, scale: '1/500' }
+      ]
+    },
+
+    'Ngô Mây': {
+      newWard: 'Phường Quy Nhơn Nam',
+      newCode: '21592',
+      ranges: [
+        { from: 1, to: 35, offset: 82, scale: '1/500' }
+      ]
+    },
+
+    'Ghềnh Ráng': {
+      newWard: 'Phường Quy Nhơn Nam',
+      newCode: '21592',
+      ranges: [
+        { from: 1, to: 30, offset: 113, scale: '1/500' },
+        { from: 31, to: 58, offset: 113, scale: '1/1.000' },
+        { from: 1, to: 6, offset: 191, scale: '1/5.000' },
+        { from: 1, to: 2, offset: 191, scale: '1/10.000' }
+      ]
+    },
+
+    // ===== QUY NHƠN BẮC =====
+    'Nhơn Phú': {
+      newWard: 'Phường Quy Nhơn Bắc',
+      newCode: '21553',
+      ranges: [
+        { from: 1, to: 3, offset: 0, scale: '1/10.000' },
+        { from: 4, to: 63, offset: 0, scale: '1/1.000' }
+      ]
+    },
+
+    'Trần Quang Diệu': {
+      newWard: 'Phường Quy Nhơn Bắc',
+      newCode: '21553',
+      ranges: [
+        { from: 1, to: 47, offset: 63, scale: '1/1.000' },
+        { from: 1, to: 1, offset: 110, scale: '1/10.000' }
+      ]
+    },
+
+    // ===== NHƠN CHÂU =====
+    'Nhơn Châu': {
+      newWard: 'Xã Nhơn Châu',
+      newCode: '21607',
+      ranges: [
+        { from: 1, to: 5, offset: 0, scale: '1/10.000' },
+        { from: 6, to: 7, offset: 0, scale: '1/1.000' },
+        { from: 8, to: 15, offset: 0, scale: '1/500' }
+      ]
+    },
+   },
+    'Hoài Ân': {
+
+    // ===== XÃ HOÀI ÂN =====
+    'Thị trấn Tăng Bạt Hổ': {
+      newWard: 'Xã Hoài Ân',
+      newCode: '21688',
+      ranges: [
+        { from: 1,  to: 29, offset: 0,  scale: '1/1.000' },
+        { from: 30, to: 37, offset: 0,  scale: '1/500' },
+        { from: 1,  to: 1,  offset: 77, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã Ân Đức': {
+      newWard: 'Xã Hoài Ân',
+      newCode: '21688',
+      ranges: [
+        { from: 1,  to: 13, offset: 37, scale: '1/2.000' },
+        { from: 1,  to: 2,  offset: 78, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã Ân Phong': {
+      newWard: 'Xã Hoài Ân',
+      newCode: '21688',
+      ranges: [
+        { from: 1, to: 13, offset: 50, scale: '1/2.000' },
+        { from: 1, to: 2,  offset: 80, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã Ân Tường Đông': {
+      newWard: 'Xã Hoài Ân',
+      newCode: '21688',
+      ranges: [
+        { from: 12, to: 26, offset: 52, scale: '1/2.000' },
+        { from: 1,  to: 3,  offset: 82, scale: '1/10.000' },
+        { from: 4,  to: 10, offset: 82, scale: '1/5.000' }
+      ]
+    },
+
+    // ===== XÃ ÂN TƯỜNG =====
+    'Xã Ân Hữu': {
+      newWard: 'Xã Ân Tường',
+      newCode: '21715',
+      ranges: [
+        { from: 1, to: 11, offset: 0,  scale: '1/2.000' },
+        { from: 1, to: 3,  offset: 30, scale: '1/10.000' },
+        { from: 3, to: 8,  offset: 38, scale: '1/5.000' }
+      ]
+    },
+
+    'Xã ĐăkMang': {
+      newWard: 'Xã Ân Tường',
+      newCode: '21715',
+      ranges: [
+        { from: 1, to: 7, offset: 11, scale: '1/2.000' },
+        { from: 1, to: 5, offset: 32, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã Ân Tường Tây': {
+      newWard: 'Xã Ân Tường',
+      newCode: '21715',
+      ranges: [
+        { from: 1,  to: 11, offset: 18, scale: '1/2.000' },
+        { from: 1,  to: 3,  offset: 37, scale: '1/10.000' },
+        { from: 4,  to: 9,  offset: 43, scale: '1/5.000' }
+      ]
+    },
+
+    // ===== XÃ KIM SƠN =====
+    'Xã Ân Nghĩa': {
+      newWard: 'Xã Kim Sơn',
+      newCode: '21727',
+      ranges: [
+        { from: 1, to: 23, offset: 0, scale: '1/2.000' }
+      ]
+    },
+
+    'Xã Bok Tới': {
+      newWard: 'Xã Kim Sơn',
+      newCode: '21727',
+      ranges: [
+        { from: 1, to: 13, offset: 23, scale: '1/2.000' },
+        { from: 1, to: 6,  offset: 36, scale: '1/10.000' }
+      ]
+    },
+
+    // ===== XÃ VẠN ĐỨC =====
+    'Xã Ân Tín': {
+      newWard: 'Xã Vạn Đức',
+      newCode: '21703',
+      ranges: [
+        { from: 1, to: 10, offset: 0,  scale: '1/2.000' },
+        { from: 1, to: 2,  offset: 23, scale: '1/10.000' },
+        { from: 2, to: 7,  offset: 28, scale: '1/5.000' }
+      ]
+    },
+
+    'Xã Ân Sơn': {
+      newWard: 'Xã Vạn Đức',
+      newCode: '21703',
+      ranges: [
+        { from: 1, to: 3, offset: 10, scale: '1/1.000' },
+        { from: 1, to: 3, offset: 25, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã Ân Thạnh': {
+      newWard: 'Xã Vạn Đức',
+      newCode: '21703',
+      ranges: [
+        { from: 1, to: 10, offset: 13, scale: '1/2.000' },
+        { from: 1, to: 1,  offset: 28, scale: '1/10.000' }
+      ]
+    },
+
+    // ===== XÃ ÂN HẢO =====
+    'Xã Ân Mỹ': {
+      newWard: 'Xã Ân Hảo',
+      newCode: '21697',
+      ranges: [
+        { from: 1, to: 11, offset: 0,  scale: '1/2.000' },
+        { from: 1, to: 2,  offset: 30, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã Ân Hảo Đông': {
+      newWard: 'Xã Ân Hảo',
+      newCode: '21697',
+      ranges: [
+        { from: 10, to: 18, offset: 2,  scale: '1/2.000' },
+        { from: 1,  to: 3,  offset: 32, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã Ân Hảo Tây': {
+      newWard: 'Xã Ân Hảo',
+      newCode: '21697',
+      ranges: [
+        { from: 1, to: 10, offset: 20, scale: '1/2.000' },
+        { from: 1, to: 2,  offset: 35, scale: '1/10.000' }
+      ]
+    }
+
+  },
+
+   'Vân Canh': {
+
+    /* ===== XÃ VÂN CANH (MỚI) ===== */
+    'Thị trấn Vân Canh': {
+      newWard: 'Xã Vân Canh',
+      newCode: '21994',
+      ranges: [
+        { from: 1,  to: 25, offset: 0,   scale: '1/2.000' },
+        { from: 26, to: 73, offset: 0,   scale: '1/500' },
+        { from: 1,  to: 1,  offset: 135, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã Canh Thuận': {
+      newWard: 'Xã Vân Canh',
+      newCode: '21994',
+      ranges: [
+        { from: 1,  to: 35, offset: 73,  scale: '1/2.000' },
+        { from: 1,  to: 4,  offset: 136, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã Canh Hiệp': {
+      newWard: 'Xã Vân Canh',
+      newCode: '21994',
+      ranges: [
+        { from: 12, to: 15, offset: 109, scale: '1/2.000' },
+        { from: 4,  to: 6,  offset: 142, scale: '1/10.000' },
+        { from: 17, to: 35, offset: 85,  scale: '1/5.000' }
+      ]
+    },
+
+    'Xã Canh Hoà': {
+      newWard: 'Xã Vân Canh',
+      newCode: '21994',
+      ranges: [
+        { from: 1,  to: 35, offset: 113, scale: '1/2.000' },
+        { from: 36, to: 55, offset: 145, scale: '1/5.000' },
+        { from: 1,  to: 2,  offset: 140, scale: '1/10.000' }
+      ]
+    },
+
+    /* ===== XÃ CANH VINH (MỚI) ===== */
+    'Xã Canh Hiển': {
+      newWard: 'Xã Canh Vinh',
+      newCode: '22006',
+      ranges: [
+        { from: 1,  to: 11, offset: 0,   scale: '1/2.000' },
+        { from: 1,  to: 2,  offset: 53,  scale: '1/10.000' },
+        { from: 13, to: 32, offset: 65,  scale: '1/5.000' }
+      ]
+    },
+
+    'Xã Canh Liên': {
+      newWard: 'Xã Canh Vinh',
+      newCode: '22006',
+      ranges: [
+        { from: 1,  to: 33, offset: 0,   scale: '1/2.000' },
+        { from: 2,  to: 15, offset: 33,  scale: '1/10.000' }
+      ]
+    },
+
+    'Xã Canh Vinh': {
+      newWard: 'Xã Canh Vinh',
+      newCode: '22006',
+      ranges: [
+        { from: 1,  to: 28, offset: 25,  scale: '1/2.000' },
+        { from: 1,  to: 4,  offset: 61,  scale: '1/10.000' },
+        { from: 26, to: 77, offset: 84,  scale: '1/5.000' }
+      ]
+    },
+    // ===== ✅ XÃ CANH LIÊN (CÓ RỒI NÈ) =====
+    'Xã Canh Liên': {
+      newWard: 'Xã Canh Liên',
+      newCode: '21997',
+      ranges: [
+        { from: 1, to: 33, offset: 0, scale: '1/2.000' },
+        { from: 2, to: 15, offset: 32, scale: '1/10.000' }
+      ]
+    }
+  },
+  'Hoài Nhơn': {
+
+    /* ===== PHƯỜNG BỒNG SƠN ===== */
+    'Phường Bồng Sơn': {
+      newWard: 'Phường Bồng Sơn',
+      newCode: '21640',
+      ranges: [
+        { from: 1, to: 72, offset: 0, scale: '1/1.000' },
+        { from: 73, to: 115, offset: 0, scale: '1/500' },
+        { from: 1, to: 1, offset: 171, scale: '1/10.000' }
+      ]
+    },
+
+    'Phường Hoài Đức': {
+      newWard: 'Phường Bồng Sơn',
+      newCode: '21640',
+      ranges: [
+        { from: 1, to: 50, offset: 115, scale: '1/2.000' },
+        { from: 51, to: 56, offset: 115, scale: '1/1.000' },
+        { from: 1, to: 3, offset: 172, scale: '1/10.000' }
+      ]
+    },
+
+    /* ===== PHƯỜNG HOÀI NHƠN ===== */
+    'Phường Hoài Thanh Tây': {
+      newWard: 'Phường Hoài Nhơn',
+      newCode: '21664',
+      ranges: [
+        { from: 1, to: 22, offset: 0, scale: '1/2.000' }
+      ]
+    },
+
+    'Phường Tam Quan Nam': {
+      newWard: 'Phường Hoài Nhơn',
+      newCode: '21664',
+      ranges: [
+        { from: 1, to: 18, offset: 22, scale: '1/2.000' },
+        { from: 19, to: 30, offset: 22, scale: '1/1.000' },
+        { from: 1, to: 1, offset: 89, scale: '1/10.000' }
+      ]
+    },
+
+    'Phường Hoài Thanh': {
+      newWard: 'Phường Hoài Nhơn',
+      newCode: '21664',
+      ranges: [
+        { from: 1, to: 28, offset: 52, scale: '1/2.000' },
+        { from: 29, to: 36, offset: 52, scale: '1/1.000' },
+        { from: 1, to: 1, offset: 90, scale: '1/10.000' }
+      ]
+    },
+
+    /* ===== PHƯỜNG HOÀI NHƠN ĐÔNG ===== */
+    'Phường Hoài Hương': {
+      newWard: 'Phường Hoài Nhơn Đông',
+      newCode: '21670',
+      ranges: [
+        { from: 1, to: 18, offset: 0, scale: '1/2.000' },
+        { from: 19, to: 32, offset: 0, scale: '1/1.000' },
+        { from: 1, to: 1, offset: 103, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã Hoài Hải': {
+      newWard: 'Phường Hoài Nhơn Đông',
+      newCode: '21670',
+      ranges: [
+        { from: 1, to: 15, offset: 32, scale: '1/2.000' },
+        { from: 16, to: 25, offset: 32, scale: '1/1.000' },
+        { from: 1, to: 1, offset: 104, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã Hoài Mỹ': {
+      newWard: 'Phường Hoài Nhơn Đông',
+      newCode: '21670',
+      ranges: [
+        { from: 1, to: 46, offset: 57, scale: '1/2.000' },
+        { from: 1, to: 3, offset: 105, scale: '1/10.000' }
+      ]
+    },
+
+    /* ===== PHƯỜNG HOÀI NHƠN TÂY ===== */
+    'Phường Hoài Hảo': {
+      newWard: 'Phường Hoài Nhơn Tây',
+      newCode: '21661',
+      ranges: [
+        { from: 1, to: 30, offset: 0, scale: '1/2.000' },
+        { from: 1, to: 2, offset: 47, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã Hoài Phú': {
+      newWard: 'Phường Hoài Nhơn Tây',
+      newCode: '21661',
+      ranges: [
+        { from: 1, to: 17, offset: 30, scale: '1/2.000' },
+        { from: 1, to: 2, offset: 49, scale: '1/10.000' }
+      ]
+    },
+
+    /* ===== PHƯỜNG HOÀI NHƠN NAM ===== */
+    'Phường Hoài Tân': {
+      newWard: 'Phường Hoài Nhơn Nam',
+      newCode: '21673',
+      ranges: [
+        { from: 1, to: 28, offset: 0, scale: '1/2.000' },
+        { from: 29, to: 30, offset: 0, scale: '1/1.000' },
+        { from: 1, to: 1, offset: 49, scale: '1/10.000' }
+      ]
+    },
+
+    'Phường Hoài Xuân': {
+      newWard: 'Phường Hoài Nhơn Nam',
+      newCode: '21673',
+      ranges: [
+        { from: 1, to: 19, offset: 30, scale: '1/2.000' },
+        { from: 1, to: 1, offset: 50, scale: '1/10.000' }
+      ]
+    },
+
+    /* ===== PHƯỜNG HOÀI NHƠN BẮC ===== */
+    'Phường Tam Quan Bắc': {
+      newWard: 'Phường Hoài Nhơn Bắc',
+      newCode: '21655',
+      ranges: [
+        { from: 1, to: 6, offset: 0, scale: '1/1.000' },
+        { from: 7, to: 21, offset: 0, scale: '1/2.000' },
+        { from: 1, to: 1, offset: 79, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã Hoài Sơn': {
+      newWard: 'Phường Hoài Nhơn Bắc',
+      newCode: '21655',
+      ranges: [
+        { from: 1, to: 35, offset: 21, scale: '1/2.000' },
+        { from: 1, to: 3, offset: 80, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã Hoài Châu Bắc': {
+      newWard: 'Phường Hoài Nhơn Bắc',
+      newCode: '21655',
+      ranges: [
+        { from: 1, to: 23, offset: 56, scale: '1/2.000' },
+        { from: 1, to: 2, offset: 83, scale: '1/10.000' }
+      ]
+    }
+
+  },
+  'Tuy Phước': {
+
+  /* =========================
+     THỊ TRẤN TUY PHƯỚC
+  ========================== */
+  'Thị trấn Tuy Phước': {
+    newWard: 'Xã Tuy Phước',
+    newCode: '21952',
+    ranges: [
+      { from: 1,  to: 1,  offset: 0,  scale: '1/10.000' },
+      { from: 2,  to: 38, offset: 0,  scale: '1/1.000' },
+      { from: 39, to: 87, offset: 0,  scale: '1/500' }
+    ]
+  },
+
+  /* =========================
+     XÃ PHƯỚC LỘC
+  ========================== */
+  'Xã Phước Lộc': {
+    newWard: 'Xã Tuy Phước',
+    newCode: '21952',
+    ranges: [
+      { from: 1,  to: 1,  offset: 289, scale: '1/10.000' },
+      { from: 2,  to: 16, offset: 86,  scale: '1/2.000' },
+      { from: 17, to: 39, offset: 86,  scale: '1/1.000' }
+    ]
+  },
+
+  /* =========================
+     XÃ PHƯỚC NGHĨA
+  ========================== */
+  'Xã Phước Nghĩa': {
+    newWard: 'Xã Tuy Phước',
+    newCode: '21952',
+    ranges: [
+      { from: 1,  to: 1,  offset: 290, scale: '1/10.000' },
+      { from: 2,  to: 12, offset: 124, scale: '1/2.000' },
+      { from: 13, to: 13, offset: 124, scale: '1/1.000' },
+      { from: 14, to: 30, offset: 124, scale: '1/2.000' }
+    ]
+  },
+
+  /* =========================
+     XÃ PHƯỚC THUẬN
+  ========================== */
+  'Xã Phước Thuận': {
+    newWard: 'Xã Tuy Phước',
+    newCode: '21952',
+    ranges: [
+      { from: 1,  to: 1,  offset: 291, scale: '1/10.000' },
+      { from: 2,  to: 31, offset: 153, scale: '1/2.000' },
+      { from: 32, to: 58, offset: 153, scale: '1/1.000' }
+    ]
+  },
+
+  /* =========================
+     THỊ TRẤN DIÊU TRÌ
+  ========================== */
+  'Thị trấn Diêu Trì': {
+    newWard: 'Xã Tuy Phước',
+    newCode: '21952',
+    ranges: [
+      { from: 1,  to: 1,  offset: 292, scale: '1/10.000' },
+      { from: 2,  to: 35, offset: 210, scale: '1/1.000' },
+      { from: 36, to: 79, offset: 210, scale: '1/500' }
+    ]
+  },
+
+  /* =========================
+     XÃ PHƯỚC SƠN → TUY PHƯỚC ĐÔNG
+  ========================== */
+  'Xã Phước Sơn': {
+    newWard: 'Xã Tuy Phước Đông',
+    newCode: '21970',
+    ranges: [
+      { from: 1,  to: 1,  offset: 0, scale: '1/10.000' },
+      { from: 2,  to: 37, offset: 0, scale: '1/2.000' },
+      { from: 38, to: 64, offset: 0, scale: '1/1.000' }
+    ]
+  },
+
+  /* =========================
+     XÃ PHƯỚC THẮNG
+  ========================== */
+  'Xã Phước Thắng': {
+    newWard: 'Xã Tuy Phước Đông',
+    newCode: '21970',
+    ranges: [
+      { from: 1,  to: 29, offset: 64, scale: '1/2.000' },
+      { from: 30, to: 44, offset: 64, scale: '1/1.000' }
+    ]
+  },
+
+  /* =========================
+     XÃ PHƯỚC HÒA
+  ========================== */
+  'Xã Phước Hòa': {
+    newWard: 'Xã Tuy Phước Đông',
+    newCode: '21970',
+    ranges: [
+      { from: 1,  to: 2,  offset: 172, scale: '1/10.000' },
+      { from: 3,  to: 38, offset: 106, scale: '1/2.000' },
+      { from: 39, to: 65, offset: 106, scale: '1/1.000' }
+    ]
+  },
+
+  /* =========================
+     XÃ PHƯỚC AN → TUY PHƯỚC TÂY
+  ========================== */
+  'Xã Phước An': {
+    newWard: 'Xã Tuy Phước Tây',
+    newCode: '21985',
+    ranges: [
+      { from: 1,  to: 1,  offset: 0, scale: '1/10.000' },
+      { from: 2,  to: 30, offset: 0, scale: '1/2.000' },
+      { from: 31, to: 57, offset: 0, scale: '1/1.000' },
+      { from: 49, to: 74, offset: 36, scale: '1/5.000' }
+    ]
+  },
+
+  /* =========================
+     XÃ PHƯỚC THÀNH
+  ========================== */
+  'Xã Phước Thành': {
+    newWard: 'Xã Tuy Phước Tây',
+    newCode: '21985',
+    ranges: [
+      { from: 1,  to: 2,  offset: 82, scale: '1/10.000' },
+      { from: 3,  to: 27, offset: 55, scale: '1/2.000' },
+      { from: 26, to: 46, offset: 86, scale: '1/5.000' }
+    ]
+  },
+
+  /* =========================
+     XÃ PHƯỚC QUANG → TUY PHƯỚC BẮC
+  ========================== */
+  'Xã Phước Quang': {
+    newWard: 'Xã Tuy Phước Bắc',
+    newCode: '21964',
+    ranges: [
+      { from: 1,  to: 21, offset: 0, scale: '1/2.000' },
+      { from: 22, to: 39, offset: 0, scale: '1/1.000' }
+    ]
+  },
+
+  /* =========================
+     XÃ PHƯỚC HƯNG
+  ========================== */
+  'Xã Phước Hưng': {
+    newWard: 'Xã Tuy Phước Bắc',
+    newCode: '21964',
+    ranges: [
+      { from: 1,  to: 22, offset: 39, scale: '1/2.000' },
+      { from: 23, to: 42, offset: 39, scale: '1/1.000' }
+    ]
+  },
+
+  /* =========================
+     XÃ PHƯỚC HIỆP
+  ========================== */
+  'Xã Phước Hiệp': {
+    newWard: 'Xã Tuy Phước Bắc',
+    newCode: '21964',
+    ranges: [
+      { from: 1,  to: 1,  offset: 136, scale: '1/10.000' },
+      { from: 2,  to: 27, offset: 80,  scale: '1/2.000' },
+      { from: 28, to: 56, offset: 80,  scale: '1/1.000' }
+    ]
+  }
+
+},
+'Vĩnh Thạnh': {
+
+  /* ================== TT. VĨNH THẠNH ================== */
+  'Thị trấn Vĩnh Thạnh': {
+    newWard: 'Xã Vĩnh Thạnh',
+    newCode: '21786',
+    ranges: [
+      // 1/500
+      { from: 1, to: 7, offset: 0, scale: '1/500' },
+      { from: 21, to: 24, offset: 0, scale: '1/500' },
+
+      // 1/1.000
+      { from: 2, to: 20, offset: 6, scale: '1/1.000' },
+
+      // 1/2.000
+      { from: 1, to: 4, offset: 24, scale: '1/2.000' },
+
+      // 1/10.000
+      { from: 1, to: 1, offset: 56, scale: '1/10.000' }
+    ]
+  },
+
+  /* ================== XÃ VĨNH HẢO ================== */
+  'Xã Vĩnh Hảo': {
+    newWard: 'Xã Vĩnh Thạnh',
+    newCode: '21786',
+    ranges: [
+      // 1/2.000
+      { from: 2, to: 25, offset: 28, scale: '1/2.000' },
+
+      // 1/1.000
+      { from: 26, to: 28, offset: 28, scale: '1/1.000' },
+
+      // 1/10.000
+      { from: 1, to: 7, offset: 57, scale: '1/10.000' }
+    ]
+  },
+
+  /* ================== XÃ VĨNH HIỆP ================== */
+  'Xã Vĩnh Hiệp': {
+    newWard: 'Xã Vĩnh Thịnh',
+    newCode: '21796',
+    ranges: [
+      // 1/2.000
+      { from: 1, to: 28, offset: 0, scale: '1/2.000' },
+
+      // 1/10.000
+      { from: 1, to: 6, offset: 53, scale: '1/10.000' }
+    ]
+  },
+
+  /* ================== XÃ VĨNH THỊNH ================== */
+  'Xã Vĩnh Thịnh': {
+    newWard: 'Xã Vĩnh Thịnh',
+    newCode: '21796',
+    ranges: [
+      // 1/2.000
+      { from: 1, to: 26, offset: 28, scale: '1/2.000' },
+
+      // 1/10.000
+      { from: 1, to: 3, offset: 59, scale: '1/10.000' }
+    ]
+  },
+
+  /* ================== XÃ VĨNH QUANG ================== */
+  'Xã Vĩnh Quang': {
+    newWard: 'Xã Vĩnh Quang',
+    newCode: '21805',
+    ranges: [
+      // 1/2.000
+      { from: 5, to: 34, offset: -4, scale: '1/2.000' },
+
+      // 1/10.000
+      { from: 1, to: 1, offset: 96, scale: '1/10.000' }
+    ]
+  },
+
+  /* ================== XÃ VĨNH THUẬN ================== */
+  'Xã Vĩnh Thuận': {
+    newWard: 'Xã Vĩnh Quang',
+    newCode: '21805',
+    ranges: [
+      // 1/2.000
+      { from: 1, to: 54, offset: 17, scale: '1/2.000' },
+
+      // 1/1.000
+      { from: 3, to: 19, offset: 38, scale: '1/1.000' },
+
+      // 1/10.000
+      { from: 1, to: 2, offset: 97, scale: '1/10.000' }
+    ]
+  },
+
+  /* ================== XÃ VĨNH HÒA ================== */
+  'Xã Vĩnh Hòa': {
+    newWard: 'Xã Vĩnh Quang',
+    newCode: '21805',
+    ranges: [
+      // 1/2.000
+      { from: 2, to: 15, offset: 68, scale: '1/2.000' },
+
+      // 1/1.000
+      { from: 2, to: 15, offset: 81, scale: '1/1.000' },
+
+      // 1/10.000
+      { from: 1, to: 1, offset: 99, scale: '1/10.000' }
+    ]
+  },
+
+  /* ================== XÃ VĨNH SƠN ================== */
+  'Xã Vĩnh Sơn': {
+    newWard: 'Xã Vĩnh Sơn',
+    newCode: '21787',
+    ranges: [
+      // 1/2.000
+      { from: 1, to: 84, offset: 0, scale: '1/2.000' },
+
+      // 1/1.000
+      { from: 36, to: 40, offset: 0, scale: '1/1.000' },
+
+      // 1/10.000
+      { from: 1, to: 7, offset: 137, scale: '1/10.000' }
+    ]
+  },
+
+  /* ================== XÃ VĨNH KIM ================== */
+  'Xã Vĩnh Kim': {
+    newWard: 'Xã Vĩnh Sơn',
+    newCode: '21787',
+    ranges: [
+      // 1/2.000
+      { from: 1, to: 41, offset: 83, scale: '1/2.000' },
+
+      // 1/10.000
+      { from: 1, to: 6, offset: 144, scale: '1/10.000' }
+    ]
+  }
+
+},
+'An Nhơn': {
+  /* ================= PHƯỜNG BÌNH ĐỊNH ================= */
+  'Thị trấn Bình Định': {
+    newWard: 'Phường Bình Định',
+    newCode: '21907',
+    ranges: [
+      { from: 1, to: 12, offset: 0, scale: '1/2.000' },
+      { from: 13, to: 24, offset: 0, scale: '1/1.000' }
+    ]
+  },
+
+  'Xã Nhơn Phúc': {
+    newWard: 'Phường Bình Định',
+    newCode: '21907',
+    ranges: [
+      { from: 1, to: 9, offset: 24, scale: '1/2.000' },
+      { from: 41, to: 41, offset: 0, scale: '1/10.000' }
+    ]
+  },
+
+  'Xã Nhơn Khánh': {
+    newWard: 'Phường Bình Định',
+    newCode: '21907',
+    ranges: [
+      { from: 1, to: 7, offset: 33, scale: '1/2.000' }
+    ]
+  },
+
+  /* ================= PHƯỜNG AN NHƠN ================= */
+  'Thị trấn Đập Đá': {
+    newWard: 'Phường An Nhơn',
+    newCode: '21910',
+    ranges: [
+      { from: 1, to: 5, offset: 0, scale: '1/2.000' },
+      { from: 6, to: 14, offset: 0, scale: '1/1.000' }
+    ]
+  },
+
+  'Xã Nhơn Mỹ': {
+    newWard: 'Phường An Nhơn',
+    newCode: '21910',
+    ranges: [
+      { from: 1, to: 15, offset: 14, scale: '1/2.000' },
+      { from: 1, to: 1, offset: 37, scale: '1/10.000' }
+    ]
+  },
+
+  'Xã Nhơn Hậu': {
+    newWard: 'Phường An Nhơn',
+    newCode: '21910',
+    ranges: [
+      { from: 1, to: 9, offset: 28, scale: '1/2.000' },
+      { from: 1, to: 1, offset: 38, scale: '1/10.000' }
+    ]
+  },
+
+  /* ================= PHƯỜNG AN NHƠN ĐÔNG ================= */
+  'Xã Nhơn Hưng': {
+    newWard: 'Phường An Nhơn Đông',
+    newCode: '21934',
+    ranges: [
+      { from: 1, to: 7, offset: 0, scale: '1/2.000' }
+    ]
+  },
+
+  'Xã Nhơn An': {
+    newWard: 'Phường An Nhơn Đông',
+    newCode: '21934',
+    ranges: [
+      { from: 2, to: 18, offset: 6, scale: '1/2.000' }
+    ]
+  },
+
+  /* ================= PHƯỜNG AN NHƠN NAM ================= */
+  'Xã Nhơn Hòa': {
+    newWard: 'Phường An Nhơn Nam',
+    newCode: '21943',
+    ranges: [
+      { from: 1, to: 15, offset: 0, scale: '1/2.000' },
+      { from: 1, to: 2, offset: 29, scale: '1/10.000' }
+    ]
+  },
+
+  'Xã Nhơn Thọ': {
+    newWard: 'Phường An Nhơn Nam',
+    newCode: '21943',
+    ranges: [
+      { from: 1, to: 14, offset: 15, scale: '1/2.000' },
+      { from: 1, to: 2, offset: 31, scale: '1/10.000' },
+      { from: 6, to: 27, offset: 28, scale: '1/5.000' }
+    ]
+  },
+
+  /* ================= PHƯỜNG AN NHƠN BẮC ================= */
+  'Xã Nhơn Phong': {
+    newWard: 'Phường An Nhơn Bắc',
+    newCode: '21925',
+    ranges: [
+      { from: 1, to: 15, offset: 0, scale: '1/2.000' },
+      { from: 1, to: 1, offset: 63, scale: '1/10.000' }
+    ]
+  },
+
+  'Xã Nhơn Thành': {
+    newWard: 'Phường An Nhơn Bắc',
+    newCode: '21925',
+    ranges: [
+      { from: 1, to: 27, offset: 15, scale: '1/2.000' },
+      { from: 1, to: 2, offset: 64, scale: '1/10.000' }
+    ]
+  },
+
+  'Xã Nhơn Hạnh': {
+    newWard: 'Phường An Nhơn Bắc',
+    newCode: '21925',
+    ranges: [
+      { from: 1, to: 22, offset: 41, scale: '1/2.000' }
+    ]
+  },
+
+  /* ================= XÃ AN NHƠN TÂY ================= */
+  'Xã Nhơn Lộc': {
+    newWard: 'Xã An Nhơn Tây',
+    newCode: '21940',
+    ranges: [
+      { from: 1, to: 11, offset: 0, scale: '1/2.000' },
+      { from: 1, to: 1, offset: 35, scale: '1/10.000' }
+    ]
+  },
+
+  'Xã Nhơn Tân': {
+    newWard: 'Xã An Nhơn Tây',
+    newCode: '21940',
+    ranges: [
+      { from: 1, to: 25, offset: 11, scale: '1/2.000' },
+      { from: 1, to: 3, offset: 36, scale: '1/10.000' },
+      { from: 26, to: 65, offset: 14, scale: '1/5.000' }
+    ]
+  }
+
+},
+'An Lão': {
+
+    /* ===== TT AN LÃO → XÃ AN LÃO ===== */
+    'TT An Lão': {
+      newWard: 'Xã An Lão',
+      newCode: '21609',
+      ranges: [
+        { from: 1,  to: 18, offset: 0,  scale: '1/2.000' },
+        { from: 19, to: 40, offset: 0,  scale: '1/1.000' },
+        { from: 41, to: 55, offset: 0,  scale: '1/500' }
+      ]
+    },
+
+    /* ===== XÃ AN HƯNG → XÃ AN LÃO ===== */
+    'Xã An Hưng': {
+      newWard: 'Xã An Lão',
+      newCode: '21609',
+      ranges: [
+        { from: 4,  to: 34, offset: 52, scale: '1/2.000' },
+        { from: 35, to: 45, offset: 52, scale: '1/1.000' },
+        { from: 1,  to: 3,  offset: 133, scale: '1/10.000' }
+      ]
+    },
+
+    /* ===== XÃ AN TÂN → XÃ AN LÃO ===== */
+    'Xã An Tân': {
+      newWard: 'Xã An Lão',
+      newCode: '21609',
+      ranges: [
+        { from: 3,  to: 17, offset: 95, scale: '1/2.000' },
+        { from: 18, to: 38, offset: 95, scale: '1/1.000' },
+        { from: 1,  to: 2,  offset: 136, scale: '1/10.000' }
+      ]
+    },
+
+    /* ===== XÃ AN DŨNG → XÃ AN VINH ===== */
+    'Xã An Dũng': {
+      newWard: 'Xã An Vinh',
+      newCode: '21616',
+      ranges: [
+        { from: 1,  to: 2,  offset: 0, scale: '1/10.000' },
+        { from: 3,  to: 14, offset: 0, scale: '1/2.000' },
+        { from: 15, to: 27, offset: 0, scale: '1/1.000' }
+      ]
+    },
+
+    /* ===== XÃ AN VINH + AN TRUNG → XÃ AN VINH ===== */
+    'Xã An Vinh': {
+      newWard: 'Xã An Vinh',
+      newCode: '21616',
+      ranges: [
+        { from: 5,  to: 13, offset: 23, scale: '1/2.000' },
+        { from: 14, to: 42, offset: 23, scale: '1/1.000' },
+        { from: 1,  to: 4,  offset: 101, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã An Trung': {
+      newWard: 'Xã An Vinh',
+      newCode: '21616',
+      ranges: [
+        { from: 4,  to: 23, offset: 62, scale: '1/2.000' },
+        { from: 24, to: 39, offset: 62, scale: '1/1.000' },
+        { from: 1,  to: 3,  offset: 105, scale: '1/10.000' }
+      ]
+    },
+
+    /* ===== XÃ AN HÒA + AN QUANG + AN NGHĨA → XÃ AN HÒA ===== */
+    'Xã An Hòa': {
+      newWard: 'Xã An Hòa',
+      newCode: '21628',
+      ranges: [
+        { from: 1,  to: 31, offset: 0, scale: '1/2.000' },
+        { from: 32, to: 63, offset: 0, scale: '1/1.000' }
+      ]
+    },
+
+    'Xã An Quang': {
+      newWard: 'Xã An Hòa',
+      newCode: '21628',
+      ranges: [
+        { from: 4,  to: 21, offset: 60, scale: '1/2.000' },
+        { from: 22, to: 31, offset: 60, scale: '1/1.000' },
+        { from: 1,  to: 3,  offset: 96, scale: '1/10.000' }
+      ]
+    },
+
+    'Xã An Nghĩa': {
+      newWard: 'Xã An Hòa',
+      newCode: '21628',
+      ranges: [
+        { from: 1, to: 5, offset: 91, scale: '1/2.000' },
+        { from: 1, to: 1, offset: 99, scale: '1/10.000' }
+      ]
+    },
+
+    /* ===== XÃ AN TOÀN ===== */
+    'Xã An Toàn': {
+      newWard: 'Xã An Toàn',
+      newCode: '21622',
+      ranges: [
+        { from: 1,  to: 10, offset: 0, scale: '1/10.000' },
+        { from: 11, to: 92, offset: 0, scale: '1/1.000' }
+      ]
+    },
+
+    'Xã An Nghĩa': {
+      newWard: 'Xã An Toàn',
+      newCode: '21622',
+      ranges: [
+        { from: 6,  to: 15, offset: 87, scale: '1/2.000' },
+        { from: 16, to: 41, offset: 87, scale: '1/1.000' },
+        { from: 1,  to: 2,  offset: 128, scale: '1/10.000' }
+      ]
+    }
+
+  },
+  'Phù Cát':{
+
+    /* ================== THỊ TRẤN NGÔ MÂY ================== */
+    'T.T Ngô Mây': {
+      newWard: 'Xã Phù Cát',
+      newCode: '21853',
+      ranges: [
+        { from: 1,  to: 41, offset: 0,  scale: '1/1.000' },
+        { from: 42, to: 87, offset: 0,  scale: '1/500' }
+      ]
+    },
+
+    /* ================== CÁT TRINH ================== */
+    'Cát Trinh': {
+      newWard: 'Xã Phù Cát',
+      newCode: '21853',
+      ranges: [
+        { from: 6,  to: 44, offset: 82, scale: '1/2.000' },
+        { from: 45, to: 68, offset: 82, scale: '1/1.000' },
+        { from: 1,  to: 3,  offset: 207, scale: '1/10.000' }
+      ]
+    },
+
+    /* ================== CÁT TÂN ================== */
+    'Cát Tân': {
+      newWard: 'Xã Phù Cát',
+      newCode: '21853',
+      ranges: [
+        { from: 2,  to: 29, offset: 149, scale: '1/2.000' },
+        { from: 30, to: 58, offset: 149, scale: '1/1.000' },
+        { from: 1,  to: 1,  offset: 210, scale: '1/10.000' },
+        { from: 19, to: 24, offset: 211, scale: '1/5.000' }
+      ]
+    },
+
+    /* ================== CÁT TƯỜNG ================== */
+    'Cát Tường': {
+      newWard: 'Xã Xuân An',
+      newCode: '21892',
+      ranges: [
+        { from: 1,  to: 2,  offset: 0,  scale: '1/10.000' },
+        { from: 3,  to: 32, offset: 0,  scale: '1/2.000' },
+        { from: 33, to: 56, offset: 0,  scale: '1/1.000' },
+        { from: 17, to: 20, offset: 90, scale: '1/5.000' }
+      ]
+    },
+
+    /* ================== CÁT NHƠN ================== */
+    'Cát Nhơn': {
+      newWard: 'Xã Xuân An',
+      newCode: '21892',
+      ranges: [
+        { from: 3,  to: 27, offset: 54, scale: '1/2.000' },
+        { from: 28, to: 50, offset: 54, scale: '1/1.000' },
+        { from: 1,  to: 2,  offset: 104, scale: '1/10.000' },
+        { from: 16, to: 24, offset: 95, scale: '1/5.000' }
+      ]
+    },
+
+    /* ================== CÁT THẮNG ================== */
+    'Cát Thắng': {
+      newWard: 'Xã Ngô Mây',
+      newCode: '21901',
+      ranges: [
+        { from: 2,  to: 16, offset: 0,  scale: '1/2.000' },
+        { from: 17, to: 40, offset: 0,  scale: '1/1.000' }
+      ]
+    },
+
+    /* ================== CÁT HƯNG ================== */
+    'Cát Hưng': {
+      newWard: 'Xã Ngô Mây',
+      newCode: '21901',
+      ranges: [
+        { from: 3,  to: 23, offset: 38, scale: '1/2.000' },
+        { from: 24, to: 48, offset: 38, scale: '1/1.000' },
+        { from: 1,  to: 2,  offset: 126, scale: '1/10.000' }
+      ]
+    },
+
+    /* ================== CÁT CHÁNH ================== */
+    'Cát Chánh': {
+      newWard: 'Xã Ngô Mây',
+      newCode: '21901',
+      ranges: [
+        { from: 2,  to: 15, offset: 85,  scale: '1/2.000' },
+        { from: 16, to: 45, offset: 85,  scale: '1/1.000' },
+        { from: 1,  to: 1,  offset: 128, scale: '1/10.000' },
+        { from: 13, to: 18, offset: 119, scale: '1/5.000' }
+      ]
+    },
+
+    'Cát Hải': {
+      newWard: 'Xã Cát Tiến',
+      newCode: '21880',
+      ranges: [
+        { from: 1, to: 2, offset: 0, scale: '1/10.000' },
+        { from: 3, to: 24, offset: -1, scale: '1/2.000' },
+        { from: 25, to: 46, offset: -1, scale: '1/1.000' }
+      ]
+    },
+
+    /* ================= CÁT THÀNH ================= */
+    'Cát Thành': {
+      newWard: 'Xã Cát Tiến',
+      newCode: '21880',
+      ranges: [
+        { from: 3, to: 26, offset: 44, scale: '1/2.000' },
+        { from: 27, to: 48, offset: 42, scale: '1/1.000' },
+        { from: 1, to: 1, offset: 127, scale: '1/10.000' }
+      ]
+    },
+
+    /* ================= CÁT TIẾN ================= */
+    'Cát Tiến': {
+      newWard: 'Xã Cát Tiến',
+      newCode: '21880',
+      ranges: [
+        { from: 2, to: 16, offset: 89, scale: '1/2.000' },
+        { from: 17, to: 37, offset: 89, scale: '1/1.000' },
+        { from: 1, to: 2, offset: 128, scale: '1/10.000' },
+        { from: 13, to: 14, offset: 118, scale: '1/5.000' }
+      ]
+    },
+
+    /* ================= CÁT MINH ================= */
+    'Cát Minh': {
+      newWard: 'Xã Đề Gi',
+      newCode: '21859',
+      ranges: [
+        { from: 1, to: 2, offset: 0, scale: '1/10.000' },
+        { from: 3, to: 30, offset: 0, scale: '1/2.000' },
+        { from: 31, to: 57, offset: 0, scale: '1/1.000' }
+      ]
+    },
+
+    /* ================= CÁT TÀI ================= */
+    'Cát Tài': {
+      newWard: 'Xã Đề Gi',
+      newCode: '21859',
+      ranges: [
+        { from: 3, to: 32, offset: 55, scale: '1/2.000' },
+        { from: 33, to: 59, offset: 55, scale: '1/1.000' },
+        { from: 1, to: 2, offset: 165, scale: '1/10.000' },
+        { from: 16, to: 23, offset: 167, scale: '1/5.000' }
+      ]
+    },
+
+    /* ================= CÁT KHÁNH ================= */
+    'Cát Khánh': {
+      newWard: 'Xã Đề Gi',
+      newCode: '21859',
+      ranges: [
+        { from: 3, to: 24, offset: 112, scale: '1/2.000' },
+        { from: 25, to: 53, offset: 112, scale: '1/1.000' },
+        { from: 1, to: 2, offset: 167, scale: '1/10.000' },
+        { from: 10, to: 22, offset: 160, scale: '1/5.000' }
+      ]
+    },
+
+    /* ================= CÁT HANH ================= */
+    'Cát Hanh': {
+      newWard: 'Xã Hòa Hội',
+      newCode: '21871',
+      ranges: [
+        { from: 1, to: 2, offset: 0, scale: '1/10.000' },
+        { from: 3, to: 70, offset: 0, scale: '1/2.000' },
+        { from: 71, to: 110, offset: -1, scale: '1/1.000' },
+        { from: 46, to: 53, offset: 173, scale: '1/5.000' }
+      ]
+    },
+
+    /* ================= CÁT HIỆP ================= */
+    'Cát Hiệp': {
+      newWard: 'Xã Hòa Hội',
+      newCode: '21871',
+      ranges: [
+        { from: 3, to: 83, offset: 107, scale: '1/2.000' },
+        { from: 84, to: 109, offset: 107, scale: '1/1.000' },
+        { from: 1, to: 2, offset: 216, scale: '1/10.000' },
+        { from: 30, to: 34, offset: 197, scale: '1/5.000' },
+        { from: 68, to: 84, offset: 164, scale: '1/5.000' }
+      ]
+    },
+    /* ================== CÁT LÂM ================== */
+    'Cát Lâm': {
+      newWard: 'Xã Hội Sơn',
+      newCode: '21868',
+      ranges: [
+        // 1/10.000
+        { from: 1, to: 3, offset: 0, scale: '1/10.000' },
+
+        // 1/2.000
+        { from: 4, to: 81, offset: 0, scale: '1/2.000' },
+
+        // 1/1.000
+        { from: 82, to: 103, offset: 0, scale: '1/1.000' },
+
+        // 1/5.000
+        { from: 71, to: 123, offset: 114, scale: '1/5.000' },
+
+        // 1/2.000 (tiếp)
+        { from: 104, to: 114, offset: 114, scale: '1/2.000' }
+      ]
+    },
+
+    /* ================== CÁT SƠN ================== */
+    'Cát Sơn': {
+      newWard: 'Xã Hội Sơn',
+      newCode: '21868',
+      ranges: [
+        // 1/10.000
+        { from: 1, to: 5, offset: 179, scale: '1/10.000' },
+
+        // 1/2.000
+        { from: 6, to: 56, offset: 98, scale: '1/2.000' },
+
+        // 1/1.000
+        { from: 57, to: 81, offset: 98, scale: '1/1.000' },
+
+        // 1/5.000
+        { from: 35, to: 60, offset: 203, scale: '1/5.000' }
+      ]
+    }
+
+
+  },
+    'Phù Mỹ': {
+
+    /* =========================
+       THỊ TRẤN PHÙ MỸ → XÃ PHÙ MỸ
+       ========================= */
+    'Thị trấn Phù Mỹ': {
+      newWard: 'Xã Phù Mỹ',
+      newCode: '21730',
+      ranges: [
+        { from: 1, to: 61, offset: 0, scale: '1/1.000' },
+        { from: 62, to: 95, offset: 0, scale: '1/500' }
+      ]
+    },
+
+    /* =========================
+       MỸ QUANG → XÃ PHÙ MỸ
+       ========================= */
+    'Xã Mỹ Quang': {
+      newWard: 'Xã Phù Mỹ',
+      newCode: '21730',
+      ranges: [
+        { from: 1, to: 1, offset: 173, scale: '1/10.000' },
+        { from: 2, to: 28, offset: 94, scale: '1/2.000' },
+        { from: 29, to: 47, offset: 94, scale: '1/1.000' }
+      ]
+    },
+
+    /* =========================
+       MỸ CHÁNH TÂY → XÃ PHÙ MỸ
+       ========================= */
+    'Xã Mỹ Chánh Tây': {
+      newWard: 'Xã Phù Mỹ',
+      newCode: '21730',
+      ranges: [
+        { from: 1, to: 1, offset: 174, scale: '1/10.000' },
+        { from: 2, to: 20, offset: 140, scale: '1/2.000' },
+        { from: 21, to: 33, offset: 140, scale: '1/1.000' }
+      ]
+    },
+
+    /* =========================
+       MỸ CHÁNH → XÃ AN LƯƠNG
+       ========================= */
+    'Xã Mỹ Chánh': {
+      newWard: 'Xã An Lương',
+      newCode: '21769',
+      ranges: [
+        { from: 1, to: 1, offset: 0, scale: '1/10.000' },
+        { from: 2, to: 28, offset: 0, scale: '1/2.000' },
+        { from: 29, to: 42, offset: 0, scale: '1/1.000' },
+        { from: 32, to: 34, offset: 102, scale: '1/5.000' }
+      ]
+    },
+
+    /* =========================
+       MỸ THÀNH → XÃ AN LƯƠNG
+       ========================= */
+    'Xã Mỹ Thành': {
+      newWard: 'Xã An Lương',
+      newCode: '21769',
+      ranges: [
+        { from: 1, to: 3, offset: 129, scale: '1/10.000' },
+        { from: 4, to: 31, offset: 39, scale: '1/2.000' },
+        { from: 32, to: 51, offset: 34, scale: '1/1.000' }
+      ]
+    },
+
+    /* =========================
+       MỸ CÁT → XÃ AN LƯƠNG
+       ========================= */
+    'Xã Mỹ Cát': {
+      newWard: 'Xã An Lương',
+      newCode: '21769',
+      ranges: [
+        { from: 1, to: 1, offset: 132, scale: '1/10.000' },
+        { from: 2, to: 20, offset: 84, scale: '1/2.000' },
+        { from: 21, to: 45, offset: 84, scale: '1/1.000' }
+      ]
+    },
+
+    /* =========================
+       BÌNH DƯƠNG → XÃ BÌNH DƯƠNG
+       ========================= */
+    'T.T Bình Dương': {
+      newWard: 'Xã Bình Dương',
+      newCode: '21733',
+      ranges: [
+        { from: 1, to: 29, offset: 0, scale: '1/1.000' },
+        { from: 30, to: 56, offset: 0, scale: '1/500' }
+      ]
+    },
+
+    /* =========================
+       MỸ LỢI → XÃ BÌNH DƯƠNG
+       ========================= */
+    'Xã Mỹ Lợi': {
+      newWard: 'Xã Bình Dương',
+      newCode: '21733',
+      ranges: [
+        { from: 2, to: 27, offset: 55, scale: '1/2.000' },
+        { from: 28, to: 41, offset: 55, scale: '1/1.000' },
+        { from: 2, to: 2, offset: 157, scale: '1/10.000' }
+      ]
+    },
+
+    /* =========================
+       MỸ PHONG → XÃ BÌNH DƯƠNG
+       ========================= */
+    'Xã Mỹ Phong': {
+      newWard: 'Xã Bình Dương',
+      newCode: '21733',
+      ranges: [
+        { from: 1, to: 2, offset: 159, scale: '1/10.000' },
+        { from: 3, to: 37, offset: 94, scale: '1/2.000' },
+        { from: 38, to: 64, offset: 94, scale: '1/1.000' }
+      ]
+    },
+
+    /* =========================
+       MỸ AN → XÃ PHÙ MỸ ĐÔNG
+       ========================= */
+    'Xã Mỹ An': {
+      newWard: 'Xã Phù Mỹ Đông',
+      newCode: '21751',
+      ranges: [
+        { from: 1, to: 1, offset: 0, scale: '1/10.000' },
+        { from: 2, to: 31, offset: 0, scale: '1/2.000' },
+        { from: 32, to: 48, offset: 0, scale: '1/1.000' }
+      ]
+    },
+
+    /* =========================
+       MỸ THẮNG → XÃ PHÙ MỸ ĐÔNG
+       ========================= */
+    'Xã Mỹ Thắng': {
+      newWard: 'Xã Phù Mỹ Đông',
+      newCode: '21751',
+      ranges: [
+        { from: 1, to: 2, offset: 145, scale: '1/10.000' },
+        { from: 3, to: 32, offset: 46, scale: '1/2.000' },
+        { from: 33, to: 49, offset: 46, scale: '1/1.000' }
+      ]
+    },
+
+    /* =========================
+       MỸ THỌ → XÃ PHÙ MỸ ĐÔNG
+       ========================= */
+    'Xã Mỹ Thọ': {
+      newWard: 'Xã Phù Mỹ Đông',
+      newCode: '21751',
+      ranges: [
+        { from: 1, to: 2, offset: 147, scale: '1/10.000' },
+        { from: 3, to: 52, offset: 93, scale: '1/2.000' }
+      ]
+    },
+    /* ================= PHÙ MỸ TÂY ================= */
+  'Xã Mỹ Trinh': {
+    newWard: 'Xã Phù Mỹ Tây',
+    newCode: '21757',
+    ranges: [
+      // 1/10.000
+      { from: 1, to: 3, offset: 0, scale: '1/10.000' },
+
+      // 1/2.000
+      { from: 4, to: 50, offset: 0, scale: '1/2.000' },
+
+      // 1/1.000
+      { from: 51, to: 70, offset: 0, scale: '1/1.000' },
+
+      // 1/5.000 (đẩy tiếp sau 129)
+      { from: 23, to: 48, offset: 107, scale: '1/5.000' }
+    ]
+  },
+
+  'Xã Mỹ Hòa': {
+    newWard: 'Xã Phù Mỹ Tây',
+    newCode: '21757',
+    ranges: [
+      // 1/10.000
+      { from: 1, to: 2, offset: 127, scale: '1/10.000' },
+
+      // 1/2.000
+      { from: 3, to: 32, offset: 68, scale: '1/2.000' },
+
+      // 1/1.000
+      { from: 33, to: 59, offset: 68, scale: '1/1.000' }
+    ]
+  },
+
+  /* ================= PHÙ MỸ NAM ================= */
+  'Xã Mỹ Hiệp': {
+    newWard: 'Xã Phù Mỹ Nam',
+    newCode: '21775',
+    ranges: [
+      // 1/10.000
+      { from: 1, to: 3, offset: 0, scale: '1/10.000' },
+
+      // 1/2.000
+      { from: 4, to: 59, offset: 0, scale: '1/2.000' },
+
+      // 1/1.000
+      { from: 60, to: 79, offset: 0, scale: '1/1.000' },
+
+      // 1/5.000
+      { from: 30, to: 48, offset: 114, scale: '1/5.000' }
+    ]
+  },
+
+  'Xã Mỹ Tài': {
+    newWard: 'Xã Phù Mỹ Nam',
+    newCode: '21775',
+    ranges: [
+      // 1/10.000
+      { from: 1, to: 1, offset: 142, scale: '1/10.000' },
+
+      // 1/2.000
+      { from: 2, to: 42, offset: 78, scale: '1/2.000' },
+
+      // 1/1.000
+      { from: 43, to: 64, offset: 78, scale: '1/1.000' }
+    ]
+  },
+
+  /* ================= PHÙ MỸ BẮC ================= */
+  'Xã Mỹ Châu': {
+    newWard: 'Xã Phù Mỹ Bắc',
+    newCode: '21739',
+    ranges: [
+      // 1/10.000
+      { from: 1, to: 2, offset: 0, scale: '1/10.000' },
+
+      // 1/2.000
+      { from: 3, to: 35, offset: 0, scale: '1/2.000' },
+
+      // 1/1.000
+      { from: 36, to: 57, offset: 0, scale: '1/1.000' },
+
+      // 1/5.000
+      { from: 20, to: 33, offset: 154, scale: '1/5.000' }
+    ]
+  },
+
+  'Xã Mỹ Đức': {
+    newWard: 'Xã Phù Mỹ Bắc',
+    newCode: '21739',
+    ranges: [
+      // 1/10.000
+      { from: 1, to: 1, offset: 170, scale: '1/10.000' },
+
+      // 1/2.000
+      { from: 2, to: 24, offset: 56, scale: '1/2.000' },
+
+      // 1/1.000
+      { from: 25, to: 43, offset: 56, scale: '1/1.000' },
+
+      // 1/5.000
+      { from: 14, to: 18, offset: 174, scale: '1/5.000' }
+    ]
+  },
+
+  'Xã Mỹ Lộc': {
+    newWard: 'Xã Phù Mỹ Bắc',
+    newCode: '21739',
+    ranges: [
+      // 1/10.000
+      { from: 1, to: 2, offset: 171, scale: '1/10.000' },
+
+      // 1/2.000
+      { from: 3, to: 42, offset: 97, scale: '1/2.000' },
+
+      // 1/1.000
+      { from: 43, to: 73, offset: 97, scale: '1/1.000' },
+
+      // 1/5.000
+      { from: 23, to: 51, offset: 170, scale: '1/5.000' }
+    ]
+  }
+
+  },
+  'Tây Sơn': {
+
+  /* ================= THỊ TRẤN PHÚ PHONG ================= */
+  'Thị trấn Phú Phong': {
+    newWard: 'Xã Tây Sơn',
+    newCode: '21808',
+    ranges: [
+      { from: 1,  to: 19, offset: 0,  scale: '1/1.000' },
+      { from: 20, to: 23, offset: 0,  scale: '1/500' },
+      { from: 24, to: 24, offset: 0,  scale: '1/1.000' },
+      { from: 25, to: 56, offset: 0,  scale: '1/500' },
+      { from: 57, to: 70, offset: 0,  scale: '1/2.000' },
+      { from: 71, to: 84, offset: 0,  scale: '1/1.000' },
+
+      // 1/10.000
+      { from: 1,  to: 1,  offset: 158, scale: '1/10.000' }
+    ]
+  },
+
+  /* ================= XÃ TÂY XUÂN ================= */
+  'Xã Tây Xuân': {
+    newWard: 'Xã Tây Sơn',
+    newCode: '21808',
+    ranges: [
+      { from: 4,  to: 26, offset: 81, scale: '1/2.000' },
+      { from: 27, to: 34, offset: 81, scale: '1/1.000' },
+
+      // 1/10.000
+      { from: 1,  to: 3,  offset: 159, scale: '1/10.000' }
+    ]
+  },
+
+  /* ================= XÃ BÌNH NGHI ================= */
+  'Xã Bình Nghi': {
+    newWard: 'Xã Tây Sơn',
+    newCode: '21808',
+    ranges: [
+      { from: 1,  to: 42, offset: 115, scale: '1/2.000' },
+      { from: 43, to: 43, offset: 115, scale: '1/1.000' },
+
+      // 1/10.000
+      { from: 1,  to: 3,  offset: 161, scale: '1/10.000' },
+
+      // 1/5.000
+      { from: 35, to: 45, offset: 130, scale: '1/5.000' }
+    ]
+  },
+
+  /* ================= XÃ TÂY GIANG ================= */
+  'Xã Tây Giang': {
+    newWard: 'Xã Bình Khê',
+    newCode: '21820',
+    ranges: [
+      { from: 1,  to: 49, offset: 0, scale: '1/2.000' },
+      { from: 50, to: 61, offset: 0, scale: '1/1.000' },
+
+      // 1/10.000
+      { from: 1,  to: 4,  offset: 123, scale: '1/10.000' }
+    ]
+  },
+
+  /* ================= XÃ TÂY THUẬN ================= */
+  'Xã Tây Thuận': {
+    newWard: 'Xã Bình Khê',
+    newCode: '21820',
+    ranges: [
+      { from: 1,  to: 62, offset: 61, scale: '1/2.000' },
+
+      // 1/10.000
+      { from: 1,  to: 4,  offset: 127, scale: '1/10.000' },
+
+      // 1/5.000
+      { from: 27, to: 77, offset: 105, scale: '1/5.000' }
+    ]
+  },
+
+  /* ================= XÃ BÌNH TƯỜNG ================= */
+  'Xã Bình Tường': {
+    newWard: 'Xã Bình Phú',
+    newCode: '21835',
+    ranges: [
+      { from: 1,  to: 48, offset: 0, scale: '1/2.000' },
+      { from: 44, to: 47, offset: -4, scale: '1/1.000' },
+
+      // 1/10.000
+      { from: 1,  to: 2, offset: 90, scale: '1/10.000' }
+    ]
+  },
+
+  /* ================= XÃ VĨNH AN ================= */
+  'Xã Vĩnh An': {
+    newWard: 'Xã Bình Phú',
+    newCode: '21835',
+    ranges: [
+      { from: 1, to: 10, offset: 44, scale: '1/2.000' },
+
+      // 1/10.000
+      { from: 1, to: 5, offset: 92, scale: '1/10.000' }
+    ]
+  },
+
+  /* ================= XÃ TÂY PHÚ ================= */
+  'Xã Tây Phú': {
+    newWard: 'Xã Bình Phú',
+    newCode: '21835',
+    ranges: [
+      { from: 1,  to: 36, offset: 54, scale: '1/2.000' },
+
+      // 1/10.000
+      { from: 1,  to: 2, offset: 97, scale: '1/10.000' },
+
+      // 1/5.000
+      { from: 12, to: 18, offset: 88, scale: '1/5.000' }
+    ]
+  },
+   /* =========================
+     BÌNH THUẬN → BÌNH HIỆP
+     ========================= */
+  'Xã Bình Thuận': {
+    oldCode: '21817',
+    newWard: 'Xã Bình Hiệp',
+    newCode: '21817',
+    ranges: [
+      { from: 1,  to: 51,  offset: 0,   scale: '1/2.000' },
+      { from: 1,  to: 2,   offset: 116, scale: '1/10.000' }
+    ]
+  },
+
+  /* =========================
+     BÌNH TÂN → BÌNH HIỆP
+     ========================= */
+  'Xã Bình Tân': {
+    oldCode: '21811',
+    newWard: 'Xã Bình Hiệp',
+    newCode: '21817',
+    ranges: [
+      { from: 1,  to: 44, offset: 51,  scale: '1/2.000' },
+      { from: 1,  to: 3,  offset: 118, scale: '1/10.000' }
+    ]
+  },
+
+  /* =========================
+     TÂY AN → BÌNH HIỆP
+     ========================= */
+  'Xã Tây An': {
+    oldCode: '21826',
+    newWard: 'Xã Bình Hiệp',
+    newCode: '21817',
+    ranges: [
+      { from: 1,  to: 21, offset: 95,  scale: '1/2.000' },
+      { from: 53, to: 79, offset: 70,  scale: '1/5.000' },
+      { from: 1,  to: 1,  offset: 121, scale: '1/10.000' }
+    ]
+  },
+  /* =========================
+     BÌNH HÒA → BÌNH AN
+     ========================= */
+  'Xã Bình Hòa': {
+    oldCode: '21829',
+    newWard: 'Xã Bình An',
+    newCode: '21829',
+    ranges: [
+      { from: 1, to: 22, offset: 0,  scale: '1/2.000' },
+      { from: 1, to: 1,  offset: 86, scale: '1/10.000' }
+    ]
+  },
+
+  /* =========================
+     BÌNH THÀNH → BÌNH AN
+     ========================= */
+  'Xã Bình Thành': {
+    oldCode: '21823',
+    newWard: 'Xã Bình An',
+    newCode: '21829',
+    ranges: [
+      { from: 1, to: 37, offset: 22, scale: '1/2.000' },
+      { from: 1, to: 3,  offset: 87, scale: '1/10.000' }
+    ]
+  },
+
+  /* =========================
+     TÂY BÌNH → BÌNH AN
+     ========================= */
+  'Xã Tây Bình': {
+    oldCode: '21832',
+    newWard: 'Xã Bình An',
+    newCode: '21829',
+    ranges: [
+      { from: 1, to: 14, offset: 59, scale: '1/2.000' },
+      { from: 1, to: 1,  offset: 90, scale: '1/10.000' }
+    ]
+  },
+
+  /* =========================
+     TÂY VINH → BÌNH AN
+     ========================= */
+  'Xã Tây Vinh': {
+    oldCode: '21838',
+    newWard: 'Xã Bình An',
+    newCode: '21829',
+    ranges: [
+      { from: 1,  to: 13, offset: 73, scale: '1/2.000' },
+      { from: 40, to: 43, offset: 52, scale: '1/5.000' }
+    ]
+  }
+
+}
+
+
+
+      },
+      
+
+
+
+
+ traCuu11() {
+  // 1. Kiểm tra nhập đủ
+  if (!this.khuVuc || !this.xa || !this.toNhap) {
+    this.ketQua = 'Vui lòng chọn khu vực, phường và nhập số tờ';
+    return;
+  }
+
+  // 2. Lấy dữ liệu đúng theo KHU VỰC → PHƯỜNG CŨ
+  const data = this.mapping[this.khuVuc]?.[this.xa];
+
+  if (!data) {
+    this.ketQua = 'Không tìm thấy dữ liệu phường/xã cũ';
+    return;
+  }
+
+  const toCu = Number(this.toNhap);
+
+  // 3. Tìm khoảng tờ phù hợp
+  const range = data.ranges.find(r => toCu >= r.from && toCu <= r.to);
+
+  if (!range) {
+    this.ketQua = 'Không có tờ bản đồ phù hợp';
+    return;
+  }
+
+  // 4. Tính tờ mới
+  const toMoi = toCu + range.offset;
+
+  // 5. Hiển thị kết quả
+  this.ketQua = `
+Tên Phường : ${data.newWard}
+,Mã phường : ${data.newCode}
+,Tờ bản đồ : ${toMoi}
+,Tỷ lệ bản đồ: ${range.scale}
+  `.trim();
+
+},
+traCuu() {
+  if (this.searchMode === 'cu_sang_moi') {
+    this.traCuuCuSangMoi();
+  } else {
+    this.traCuuMoiSangCu();
+  }
+},
+
+getDanhSachXa() {
+  if (!this.khuVuc) return [];
+
+  // CŨ → MỚI
+  if (this.searchMode === 'cu_sang_moi') {
+    return Object.keys(this.mapping[this.khuVuc] || {});
+  }
+
+  // MỚI → CŨ (unique newWard)
+  const wards = new Set();
+  Object.values(this.mapping[this.khuVuc] || {}).forEach(x => {
+    wards.add(x.newWard);
+  });
+  return Array.from(wards);
+},
+
+
+traCuuCuSangMoi() {
+  if (!this.khuVuc || !this.xa || !this.toNhap) {
+    this.ketQua = 'Vui lòng chọn khu vực, xã/phường và nhập số tờ';
+    return;
+  }
+
+  const xaData = this.mapping[this.khuVuc]?.[this.xa];
+  if (!xaData) {
+    this.ketQua = 'Không tìm thấy xã/phường cũ';
+    return;
+  }
+
+  const toCu = Number(this.toNhap);
+  const range = xaData.ranges.find(r => toCu >= r.from && toCu <= r.to);
+
+  if (!range) {
+    this.ketQua = 'Không có tờ bản đồ phù hợp';
+    return;
+  }
+
+  const toMoi = toCu + range.offset;
+
+  this.ketQua = `
+Phường/Xã mới: ${xaData.newWard}
+Mã: ${xaData.newCode}
+Tờ bản đồ mới: ${toMoi}
+Tỷ lệ: ${range.scale}
+  `.trim();
+},
+
+
+traCuuMoiSangCu() {
+  const toMoi = Number(this.toNhap);
+  const khuData = this.mapping[this.khuVuc];
+
+  for (const [xaCu, data] of Object.entries(khuData || {})) {
+    if (data.newWard !== this.xa) continue;
+
+    for (const r of data.ranges) {
+      const min = r.from + r.offset;
+      const max = r.to + r.offset;
+
+      if (toMoi >= min && toMoi <= max) {
+        this.ketQua = `
+Xã/phường cũ: ${xaCu}
+Xã/phường mới: ${data.newWard}
+Mã mới: ${data.newCode}
+Tờ cũ: ${toMoi - r.offset}
+Tỷ lệ: ${r.scale}
+        `.trim();
+        return;
+      }
+    }
+  }
+
+  this.ketQua = 'Không tìm thấy tờ bản đồ tương ứng';
+},
+
+
+
+
+  }"
+      class="max-w-5xl mx-auto mt-10 bg-white p-8 rounded-xl shadow"
+      x-init="initWatch()"
+    >
+      <h2 class="text-2xl font-bold mb-6">Tra cứu tờ bản đồ (3 cấp ↔ 2 cấp)</h2>
+
+      <!-- RADIO -->
+      <div class="flex gap-6 mb-6">
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="radio"
+            value="cu_sang_moi"
+            x-model="searchMode"
+            class="w-4 h-4 text-blue-600"
+          />
+          <span class="text-sm font-medium">Tờ bản đồ cũ → Tờ bản đồ mới</span>
+        </label>
+
+        <label class="flex items-center gap-2 cursor-pointer">
+          <input
+            type="radio"
+            value="moi_sang_cu"
+            x-model="searchMode"
+            class="w-4 h-4 text-blue-600"
+          />
+          <span class="text-sm font-medium">Tờ bản đồ mới → Tờ bản đồ cũ</span>
+        </label>
+      </div>
+
+      <!-- FORM -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- KHU VỰC -->
+        <div>
+          <label class="font-semibold">Khu vực</label>
+          <select
+            x-model="khuVuc"
+            @change="xa=''; ketQua=''"
+            class="w-full border p-2 rounded mt-1"
+          >
+            <option value="">-- Chọn --</option>
+            <template x-for="item in Object.keys(danhSachXa)" :key="item">
+              <option x-text="item"></option>
+            </template>
+          </select>
+        </div>
+
+        <!-- XÃ -->
+        <div>
+          <label class="font-semibold">Xã / Phường</label>
+          <!-- <select
+            x-model="xa"
+            :disabled="!khuVuc"
+            class="w-full border p-2 rounded mt-1"
+          >
+            <option value="">-- Chọn xã / phường --</option>
+            <template x-for="item in danhSachXa[khuVuc] || []" :key="item">
+              <option x-text="item"></option>
+            </template>
+          </select> -->
+          <select
+            x-model="xa"
+            :disabled="!khuVuc"
+            class="w-full border p-2 rounded mt-1"
+          >
+            <option value="">-- Chọn xã / phường --</option>
+            <template x-for="item in getDanhSachXa()" :key="item">
+              <option x-text="item"></option>
+            </template>
+          </select>
+        </div>
+
+        <!-- TỜ -->
+        <div>
+          <label class="font-semibold">Số tờ bản đồ</label>
+          <input
+            type="number"
+            x-model="toNhap"
+            class="w-full border p-2 rounded mt-1"
+            placeholder="Nhập số tờ"
+          />
+        </div>
+
+        <!-- BUTTON -->
+        <div class="md:col-span-3 mt-4">
+          <button
+            @click="traCuu"
+            class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700"
+          >
+            Tra cứu
+          </button>
+        </div>
+
+        <!-- KẾT QUẢ -->
+        <div x-show="ketQua" x-transition class="md:col-span-3 mt-4">
+          <div
+            class="p-4 bg-sky-50 border border-sky-200 rounded-lg text-sky-900"
+          >
+            <strong x-text="ketQua"></strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
